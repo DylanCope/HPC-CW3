@@ -212,12 +212,6 @@ int main(int argc, char* argv[])
 
   for (int tt = 0; tt < params.maxIters; tt++)
   {
-    // Write cells to device
-    err = clEnqueueWriteBuffer(
-      ocl.queue, ocl.cells, CL_TRUE, 0,
-      sizeof(t_speed) * params.nx * params.ny, cells, 0, NULL, NULL);
-    checkError(err, "writing cells data", __LINE__);
-
     timestep(params, cells, tmp_cells, obstacles, ocl);
     //av_vels[tt] = av_velocity(params, cells, obstacles, ocl);
     av_vels[tt] = tot_velocity(params, cells, obstacles, ocl) / tot_cells;
@@ -227,11 +221,6 @@ int main(int argc, char* argv[])
     printf("tot density: %.12E\n", total_density(params, cells));
 #endif
 
-    // Read cells from device
-    err = clEnqueueReadBuffer(
-      ocl.queue, ocl.cells, CL_TRUE, 0,
-      sizeof(t_speed) * params.nx * params.ny, cells, 0, NULL, NULL);
-    checkError(err, "reading cells data", __LINE__);
 
   }
 
@@ -243,6 +232,12 @@ int main(int argc, char* argv[])
   timstr = ru.ru_stime;
   systim = timstr.tv_sec + (timstr.tv_usec / 1000000.0);
 
+  // Read cells from device
+  err = clEnqueueReadBuffer(
+    ocl.queue, ocl.cells, CL_TRUE, 0,
+    sizeof(t_speed) * params.nx * params.ny, cells, 0, NULL, NULL);
+  checkError(err, "reading cells data", __LINE__);
+  
   /* write final values and free memory */
   printf("==done==\n");
   printf("Reynolds number:\t\t%.12E\n", calc_reynolds(params, cells, obstacles, ocl));
@@ -405,8 +400,6 @@ float tot_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl o
       0, NULL, NULL);
   checkError(err, "Reading back d_partial_sums", __LINE__);
  
-
-
   float tot_u = 0.0f;
 
   for (int ii = 0; ii < ocl.nwork_groups; ii++)
