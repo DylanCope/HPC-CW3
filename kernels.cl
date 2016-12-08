@@ -4,17 +4,17 @@
 
 typedef struct
 {
-  double speeds[NSPEEDS];
+  float speeds[NSPEEDS];
 } t_speed;
 
 kernel void accelerate_flow(global t_speed* cells,
                             global int* obstacles,
                             int nx, int ny,
-                            double density, double accel)
+                            float density, float accel)
 {
   /* compute weighting factors */
-  double w1 = density * accel / 9.0;
-  double w2 = density * accel / 36.0;
+  float w1 = density * accel / 9.0;
+  float w2 = density * accel / 36.0;
 
   /* modify the 2nd row of the grid */
   int ii = ny - 2;
@@ -73,12 +73,12 @@ kernel void rebound(global t_speed* cells,
 		    global t_speed* tmp_cells,
 		    global int* obstacles,
 		    int nx, int ny,
- 		    double omega)
+ 		    float omega)
 {
-  const double c_sq = 1.0 / 3.0; /* square of speed of sound */
-  const double w0 = 4.0 / 9.0;  /* weighting factor */
-  const double w1 = 1.0 / 9.0;  /* weighting factor */
-  const double w2 = 1.0 / 36.0; /* weighting factor */
+  const float c_sq = 1.0 / 3.0; /* square of speed of sound */
+  const float w0 = 4.0 / 9.0;  /* weighting factor */
+  const float w1 = 1.0 / 9.0;  /* weighting factor */
+  const float w2 = 1.0 / 36.0; /* weighting factor */
 
   int jj = get_global_id(0);
   int ii = get_global_id(1);
@@ -96,7 +96,7 @@ kernel void rebound(global t_speed* cells,
   else
   {
     /* compute local density total */
-    double local_density = 0.0;
+    float local_density = 0.0;
 
     for (int kk = 0; kk < NSPEEDS; kk++)
     {
@@ -104,7 +104,7 @@ kernel void rebound(global t_speed* cells,
     }
 
     /* compute x velocity component */
-    double u_x = (tmp_cells[ii * nx + jj].speeds[1]
+    float u_x = (tmp_cells[ii * nx + jj].speeds[1]
                   + tmp_cells[ii * nx + jj].speeds[5]
                   + tmp_cells[ii * nx + jj].speeds[8]
                   - (tmp_cells[ii * nx + jj].speeds[3]
@@ -112,7 +112,7 @@ kernel void rebound(global t_speed* cells,
                      + tmp_cells[ii * nx + jj].speeds[7]))
                  / local_density;
     /* compute y velocity component */
-    double u_y = (tmp_cells[ii * nx + jj].speeds[2]
+    float u_y = (tmp_cells[ii * nx + jj].speeds[2]
                   + tmp_cells[ii * nx + jj].speeds[5]
                   + tmp_cells[ii * nx + jj].speeds[6]
                   - (tmp_cells[ii * nx + jj].speeds[4]
@@ -121,10 +121,10 @@ kernel void rebound(global t_speed* cells,
                  / local_density;
 
     /* velocity squared */
-    double u_sq = u_x * u_x + u_y * u_y;
+    float u_sq = u_x * u_x + u_y * u_y;
 
     /* directional velocity components */
-    double u[NSPEEDS];
+    float u[NSPEEDS];
     u[1] =   u_x;        /* east */
     u[2] =         u_y;  /* north */
     u[3] = - u_x;        /* west */
@@ -135,7 +135,7 @@ kernel void rebound(global t_speed* cells,
     u[8] =   u_x - u_y;  /* south-east */
 
     /* equilibrium densities */
-    double d_equ[NSPEEDS];
+    float d_equ[NSPEEDS];
     /* zero velocity density: weight w0 */
     d_equ[0] = w0 * local_density
                * (1.0 - u_sq / (2.0 * c_sq));
