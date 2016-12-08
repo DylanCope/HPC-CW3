@@ -30,3 +30,5 @@ check:
 
 clean:
 	rm -f $(EXE)
+	rm final_state.dat
+	rm av_vels.dat
