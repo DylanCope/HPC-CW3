@@ -125,10 +125,10 @@ kernel void rebound(global t_speed* cells,
 
     /* directional velocity components */
     float u[NSPEEDS];
-    u[1] =   u_x;        /* east */
-    u[2] =         u_y;  /* north */
-    u[3] = - u_x;        /* west */
-    u[4] =       - u_y;  /* south */
+    u[1] =   u_x;        /* east       */
+    u[2] =         u_y;  /* north      */
+    u[3] = - u_x;        /* west       */
+    u[4] =       - u_y;  /* south      */
     u[5] =   u_x + u_y;  /* north-east */
     u[6] = - u_x + u_y;  /* north-west */
     u[7] = - u_x - u_y;  /* south-west */
@@ -177,29 +177,26 @@ kernel void rebound(global t_speed* cells,
 
 void reduce(                                          
    __local  float*,                          
-   __global float*);
-                        
+   __global float*); 
 
-__kernel void total_velocity(
-   global t_speed*    cells, 
-   global int* 	      obstacles,                                                       
-   __local  float*    local_sums,                          
-   __global float*    partial_sums,
-   int                n)                        
+
+kernel void total_velocity(
+   global t_speed* cells, 
+   global int* 	   obstacles,                                                       
+   local  float*   local_sums,                          
+   global float*   partial_sums,
+   int             n)                        
 {                                                          
-   int start         = get_global_id(0);                   
-   int local_size    = get_local_size(0);
-   int end           = start + local_size;  
-   
+   int local_size = get_local_size(0);
+   int ii  = get_global_id(0) + get_local_id(0);                   
 
    float accum = 0.0f;                              
 
-   for (int ii= start; ii < end || ii < n; ii++){ )
-     if (!obstacles[ii])
-       for (int kk = 0; kk < NSPEEDS; kk++)  
-         accum += cells[ii].speeds[kk];  
-   } 
+   if (!obstacles[ii])
+     for (int kk = 0; kk < NSPEEDS; kk++)  
+       accum += cells[ii].speeds[kk];  
 
+   int local_id = get_local_id(0);
    local_sums[local_id] = accum;
    barrier(CLK_LOCAL_MEM_FENCE);
    

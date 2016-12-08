@@ -1,10 +1,12 @@
-Running on host node47-007
-Time is Thu Dec 8 13:50:28 GMT 2016
+Running on host node46-002
+Time is Thu Dec 8 23:32:07 GMT 2016
 Directory is /panfs/panasas01/cosc/dc14770/CW3
-PBS job ID is 5228882.master.cm.cluster
+PBS job ID is 5230779.master.cm.cluster
 This jobs runs on the following machines:
-node47-007
+node46-002
 Using GPU at index 0
+Main function entered
+Initialising data structures and loading values from file
 
 Available OpenCL devices:
  0: Tesla K20m
@@ -13,8 +15,12 @@ Available OpenCL devices:
 Selected OpenCL device:
 -> Tesla K20m (index=0)
 
+Creating program with source
+Creating kernels
+16 work group(s) of size of 1024.
+Finished initialisation, now computing timesteps.
 ==done==
 Reynolds number:		9.754215240479E+00
-Elapsed time:			32.129851 (s)
-Elapsed user CPU time:		31.271246 (s)
-Elapsed system CPU time:	2.023692 (s)
+Elapsed time:			27.107039 (s)
+Elapsed user CPU time:		25.611106 (s)
+Elapsed system CPU time:	2.684591 (s)

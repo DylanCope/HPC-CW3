@@ -168,7 +168,7 @@ int main(int argc, char* argv[])
   t_speed* cells     = NULL;    /* grid containing fluid densities */
   t_speed* tmp_cells = NULL;    /* scratch space */
   int*     obstacles = NULL;    /* grid indicating which cells are blocked */
-  float* av_vels   = NULL;     /* a record of the av. velocity computed for each timestep */
+  float* av_vels     = NULL;    /* a record of the av. velocity computed for each timestep */
   cl_int err;
   struct timeval timstr;        /* structure to hold elapsed time */
   struct rusage ru;             /* structure to hold CPU time--system and user */
@@ -176,6 +176,7 @@ int main(int argc, char* argv[])
   double usrtim;                /* floating point number to record elapsed user CPU time */
   double systim;                /* floating point number to record elapsed system CPU time */
 
+  printf("Main function entered\n");
   /* parse the command line */
   if (argc != 3)
   {
@@ -186,7 +187,7 @@ int main(int argc, char* argv[])
     paramfile = argv[1];
     obstaclefile = argv[2];
   }
-
+  printf("Initialising data structures and loading values from file\n");
   /* initialise our data structures and load values from file */
   initialise(paramfile, obstaclefile, &params, &cells, &tmp_cells, &obstacles, &av_vels, &ocl);
 
@@ -207,16 +208,31 @@ int main(int argc, char* argv[])
   checkError(err, "writing obstacles data", __LINE__);
 
   float tot_cells = total_cells(obstacles, params.nx * params.ny);
+  printf("Finished initialisation, now computing timesteps.\n");
 
   for (int tt = 0; tt < params.maxIters; tt++)
   {
+    // Write cells to device
+    err = clEnqueueWriteBuffer(
+      ocl.queue, ocl.cells, CL_TRUE, 0,
+      sizeof(t_speed) * params.nx * params.ny, cells, 0, NULL, NULL);
+    checkError(err, "writing cells data", __LINE__);
+
     timestep(params, cells, tmp_cells, obstacles, ocl);
+    //av_vels[tt] = av_velocity(params, cells, obstacles, ocl);
     av_vels[tt] = tot_velocity(params, cells, obstacles, ocl) / tot_cells;
 #ifdef DEBUG
     printf("==timestep: %d==\n", tt);
     printf("av velocity: %.12E\n", av_vels[tt]);
     printf("tot density: %.12E\n", total_density(params, cells));
 #endif
+
+    // Read cells from device
+    err = clEnqueueReadBuffer(
+      ocl.queue, ocl.cells, CL_TRUE, 0,
+      sizeof(t_speed) * params.nx * params.ny, cells, 0, NULL, NULL);
+    checkError(err, "reading cells data", __LINE__);
+
   }
 
   gettimeofday(&timstr, NULL);
@@ -242,39 +258,20 @@ int main(int argc, char* argv[])
 float total_cells(int* obstacles, int n)
 {
   float tot = 0.0f;
-  for (int ii = 0; ii < n; ii++)
-    tot += (float) (!obstacles[ii]);
+  for (int ii = 0; ii < n; ii++) {
+    if (!obstacles[ii])
+      tot += 1.0f;
+  }
   return tot;
 }
 
 int timestep(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obstacles, t_ocl ocl)
 {
-  cl_int err;
-
-  // Write cells to device
-  err = clEnqueueWriteBuffer(
-    ocl.queue, ocl.cells, CL_TRUE, 0,
-    sizeof(t_speed) * params.nx * params.ny, cells, 0, NULL, NULL);
-  checkError(err, "writing cells data", __LINE__);
 
   accelerate_flow(params, cells, obstacles, ocl);
   propagate(params, cells, tmp_cells, ocl);
   rebound(params, cells, tmp_cells, obstacles, ocl);
-
-  // Read tmp_cells from device
-//err = clEnqueueReadBuffer(
-//  ocl.queue, ocl.tmp_cells, CL_TRUE, 0,
-//  sizeof(t_speed) * params.nx * params.ny, tmp_cells, 0, NULL, NULL);
-//checkError(err, "reading tmp_cells data", __LINE__);
-
-  // Read cells from device
-  err = clEnqueueReadBuffer(
-    ocl.queue, ocl.cells, CL_TRUE, 0,
-    sizeof(t_speed) * params.nx * params.ny, cells, 0, NULL, NULL);
-  checkError(err, "reading cells data", __LINE__);
-
-
-  //collision(params, cells, tmp_cells, obstacles, ocl);
+  
   return EXIT_SUCCESS;
 }
 
@@ -355,7 +352,7 @@ int rebound(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obsta
   err = clSetKernelArg(ocl.rebound, 4, sizeof(cl_int), &params.ny);
   checkError(err, "setting rebound arg 4", __LINE__);
   err = clSetKernelArg(ocl.rebound, 5, sizeof(cl_float), &params.omega);
-  checkError(err, "setting rebound arg 4", __LINE__);
+  checkError(err, "setting rebound arg 5", __LINE__);
 
 
   // Enqueue kernel
@@ -368,44 +365,59 @@ int rebound(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obsta
   err = clFinish(ocl.queue);
   checkError(err, "waiting for rebound kernel", __LINE__);
 
- 
-
-  /* loop over the cells in the grid */
-//for (int ii = 0; ii < params.ny; ii++)
-//{
-//  for (int jj = 0; jj < params.nx; jj++)
-//  {
-//    /* if the cell contains an obstacle */
-//    if (obstacles[ii * params.nx + jj])
-//    {
-//      /* called after propagate, so taking values from scratch space
-//      ** mirroring, and writing into main grid */
-//      cells[ii * params.nx + jj].speeds[1] = tmp_cells[ii * params.nx + jj].speeds[3];
-//      cells[ii * params.nx + jj].speeds[2] = tmp_cells[ii * params.nx + jj].speeds[4];
-//      cells[ii * params.nx + jj].speeds[3] = tmp_cells[ii * params.nx + jj].speeds[1];
-//      cells[ii * params.nx + jj].speeds[4] = tmp_cells[ii * params.nx + jj].speeds[2];
-//      cells[ii * params.nx + jj].speeds[5] = tmp_cells[ii * params.nx + jj].speeds[7];
-//      cells[ii * params.nx + jj].speeds[6] = tmp_cells[ii * params.nx + jj].speeds[8];
-//      cells[ii * params.nx + jj].speeds[7] = tmp_cells[ii * params.nx + jj].speeds[5];
-//      cells[ii * params.nx + jj].speeds[8] = tmp_cells[ii * params.nx + jj].speeds[6];
-//    }
-//  }
-//}
-
   return EXIT_SUCCESS;
 }
 
 float tot_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl ocl)
 {
+  cl_int err;
+
+  err = clSetKernelArg(ocl.total_velocity, 0, sizeof(cl_mem), &ocl.cells);
+  checkError(err, "setting total_velocity arg 0", __LINE__);
+  err = clSetKernelArg(ocl.total_velocity, 1, sizeof(cl_mem), &ocl.obstacles);
+  checkError(err, "setting total_velocity arg 1", __LINE__);
+  err = clSetKernelArg(ocl.total_velocity, 2, sizeof(cl_float) * ocl.work_group_size, NULL);
+  checkError(err, "setting total_velocity arg 2", __LINE__);
+  err = clSetKernelArg(ocl.total_velocity, 3, sizeof(cl_mem), &ocl.d_partial_sums);
+  checkError(err, "setting total_velocity arg 3", __LINE__);
+  int n = params.nx * params.ny;
+  err = clSetKernelArg(ocl.total_velocity, 4, sizeof(cl_int), &n);
+  checkError(err, "setting total_velocity arg 4", __LINE__);
+ 
+  // Enqueue kernel
+  size_t global[1] = {n};
+  size_t local[1] = {ocl.work_group_size};
+  err = clEnqueueNDRangeKernel(ocl.queue, ocl.total_velocity,
+                               1, NULL, global, local, 0, NULL, NULL);
+  checkError(err, "enqueueing total_velocity kernel", __LINE__);
+
+  // Wait for kernel to finish
+  err = clFinish(ocl.queue);
+  checkError(err, "waiting for total_velocity kernel", __LINE__); 
+  
+  err = clEnqueueReadBuffer(
+      ocl.queue,
+      ocl.d_partial_sums,
+      CL_TRUE,
+      0,
+      sizeof(float) * ocl.nwork_groups,
+      ocl.h_psums,
+      0, NULL, NULL);
+  checkError(err, "Reading back d_partial_sums", __LINE__);
+ 
+
+
   float tot_u = 0.0f;
 
+  for (int ii = 0; ii < ocl.nwork_groups; ii++)
+    tot_u += ocl.h_psums[ii];
 
   return tot_u;
 }
 
 float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl ocl)
 {
-  int    tot_cells = 0;  /* no. of cells used in calculation */
+  int tot_cells = 0;  /* no. of cells used in calculation */
   float tot_u;          /* accumulated magnitudes of velocity for each cell */
 
   /* initialise */
@@ -637,6 +649,7 @@ int initialise(const char* paramfile, const char* obstaclefile,
   fread(ocl_src, 1, ocl_size, fp);
   fclose(fp);
 
+  printf("Creating program with source\n");
   // Create OpenCL program
   ocl->program = clCreateProgramWithSource(
     ocl->context, 1, (const char**)&ocl_src, NULL, &err);
@@ -660,6 +673,7 @@ int initialise(const char* paramfile, const char* obstaclefile,
   }
   checkError(err, "building program", __LINE__);
 
+  printf("Creating kernels\n");
   // Create OpenCL kernels
   ocl->accelerate_flow = clCreateKernel(ocl->program, "accelerate_flow", &err);
   checkError(err, "creating accelerate_flow kernel", __LINE__);
@@ -671,30 +685,37 @@ int initialise(const char* paramfile, const char* obstaclefile,
   checkError(err, "creating total velocity kernel", __LINE__);  
 
   // Find kernel work-group size
-  err = clGetKernelWorkGroupInfo(ocl->total_velocity, ocl->device, 
+//err = clGetKernelWorkGroupInfo(ocl->total_velocity, ocl->device, 
+//  CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &ocl->work_group_size, NULL);
+//checkError(err, "Getting kernel work group info", __LINE__);
+//// Now that we know the size of the work-groups, we can set the number of
+//// work-groups, the actual number of steps, and the step size
+// 
+//err = clGetDeviceInfo(ocl->device, CL_DEVICE_MAX_COMPUTE_UNITS, 
+//  sizeof(size_t), &ocl->nwork_groups, NULL);
+//checkError(err, "Getting device compute unit info", __LINE__);
+
+  //ocl->nwork_groups = 8;
+  err = clGetKernelWorkGroupInfo (ocl->total_velocity, ocl->device, 
     CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &ocl->work_group_size, NULL);
   checkError(err, "Getting kernel work group info", __LINE__);
-  // Now that we know the size of the work-groups, we can set the number of
-  // work-groups, the actual number of steps, and the step size
-   
-  err = clGetDeviceInfo(ocl->device, CL_DEVICE_MAX_COMPUTE_UNITS, 
-    sizeof(size_t), &ocl->nwork_groups, NULL);
-  checkError(err, "Getting device compute unit info", __LINE__);
+//ocl->work_group_size=128;
+  ocl->nwork_groups = params->nx * params->ny / ocl->work_group_size;
 
   printf("%zu work group(s) of size of %zu.\n", 
     ocl->nwork_groups, ocl->work_group_size);
 
-  ocl->h_psums = calloc(sizeof(float), ocl->nwork_groups);
+  ocl->h_psums = calloc(sizeof(cl_float), ocl->nwork_groups);
   if (!ocl->h_psums)
   {
-    printf("Error: could not allocate host memory for h_psum\n");
+    printf("Error: could not allocate host memory for h_psums\n");
     return EXIT_FAILURE;
   }
        
   // Allocate OpenCL buffers
   ocl->d_partial_sums = clCreateBuffer(
-    ocl->context, CL_MEM_WRITE_ONLY, 
-    sizeof(float) * ocl->nwork_groups, NULL, &err);
+    ocl->context, CL_MEM_READ_WRITE, 
+    sizeof(cl_float) * ocl->nwork_groups, NULL, &err);
   checkError(err, "Creating buffer d_partial_sums", __LINE__);
   ocl->cells = clCreateBuffer(
     ocl->context, CL_MEM_READ_WRITE,
