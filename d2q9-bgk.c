@@ -242,10 +242,10 @@ int timestep(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
   rebound(params, cells, tmp_cells, obstacles, ocl);
 
   // Read tmp_cells from device
-  err = clEnqueueReadBuffer(
-    ocl.queue, ocl.tmp_cells, CL_TRUE, 0,
-    sizeof(t_speed) * params.nx * params.ny, tmp_cells, 0, NULL, NULL);
-  checkError(err, "reading tmp_cells data", __LINE__);
+//err = clEnqueueReadBuffer(
+//  ocl.queue, ocl.tmp_cells, CL_TRUE, 0,
+//  sizeof(t_speed) * params.nx * params.ny, tmp_cells, 0, NULL, NULL);
+//checkError(err, "reading tmp_cells data", __LINE__);
 
   // Read cells from device
   err = clEnqueueReadBuffer(
@@ -254,7 +254,7 @@ int timestep(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obst
   checkError(err, "reading cells data", __LINE__);
 
 
-  collision(params, cells, tmp_cells, obstacles, ocl);
+  //collision(params, cells, tmp_cells, obstacles, ocl);
   return EXIT_SUCCESS;
 }
 
@@ -334,12 +334,15 @@ int rebound(const t_param params, t_speed* cells, t_speed* tmp_cells, int* obsta
   checkError(err, "setting rebound arg 3", __LINE__);
   err = clSetKernelArg(ocl.rebound, 4, sizeof(cl_int), &params.ny);
   checkError(err, "setting rebound arg 4", __LINE__);
+  err = clSetKernelArg(ocl.rebound, 5, sizeof(cl_double), &params.omega);
+  checkError(err, "setting rebound arg 4", __LINE__);
+
 
 
   // Enqueue kernel
-  size_t global[2] = {params.nx, params.ny};
+  size_t global[3] = {params.nx, params.ny, params.omega};
   err = clEnqueueNDRangeKernel(ocl.queue, ocl.rebound,
-                               2, NULL, global, NULL, 0, NULL, NULL);
+                               3, NULL, global, NULL, 0, NULL, NULL);
   checkError(err, "enqueueing rebound kernel", __LINE__);
 
   // Wait for kernel to finish
