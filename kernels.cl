@@ -174,3 +174,57 @@ kernel void rebound(global t_speed* cells,
     }
   } 
 }
+
+void reduce(                                          
+   __local  float*,                          
+   __global float*);
+                        
+
+__kernel void total_velocity(
+   global t_speed*    cells, 
+   global int* 	      obstacles,                                                       
+   __local  float*    local_sums,                          
+   __global float*    partial_sums,
+   int                n)                        
+{                                                          
+   int start         = get_global_id(0);                   
+   int local_size    = get_local_size(0);
+   int end           = start + local_size;  
+   
+
+   float accum = 0.0f;                              
+
+   for (int ii= start; ii < end || ii < n; ii++){ )
+     if (!obstacles[ii])
+       for (int kk = 0; kk < NSPEEDS; kk++)  
+         accum += cells[ii].speeds[kk];  
+   } 
+
+   local_sums[local_id] = accum;
+   barrier(CLK_LOCAL_MEM_FENCE);
+   
+   reduce(local_sums, partial_sums);                  
+}
+
+
+void reduce(                                          
+   __local  float*    local_sums,                          
+   __global float*    partial_sums)                        
+{                                                          
+   int num_wrk_items  = get_local_size(0);                 
+   int local_id       = get_local_id(0);                   
+   int group_id       = get_group_id(0);                   
+   
+   float sum;                              
+   int i;                                      
+   
+   if (local_id == 0) {                      
+      sum = 0.0f;                            
+   
+      for (i=0; i<num_wrk_items; i++) {        
+          sum += local_sums[i];             
+      }                                     
+   
+      partial_sums[group_id] = sum;         
+   }
+}
