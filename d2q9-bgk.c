@@ -220,8 +220,6 @@ int main(int argc, char* argv[])
     printf("av velocity: %.12E\n", av_vels[tt]);
     printf("tot density: %.12E\n", total_density(params, cells));
 #endif
-
-
   }
 
   gettimeofday(&timstr, NULL);
@@ -375,12 +373,9 @@ float tot_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl o
   checkError(err, "setting total_velocity arg 2", __LINE__);
   err = clSetKernelArg(ocl.total_velocity, 3, sizeof(cl_mem), &ocl.d_partial_sums);
   checkError(err, "setting total_velocity arg 3", __LINE__);
-  int n = params.nx * params.ny;
-  err = clSetKernelArg(ocl.total_velocity, 4, sizeof(cl_int), &n);
-  checkError(err, "setting total_velocity arg 4", __LINE__);
  
   // Enqueue kernel
-  size_t global[1] = {n};
+  size_t global[1] = {params.nx * params.ny};
   size_t local[1] = {ocl.work_group_size};
   err = clEnqueueNDRangeKernel(ocl.queue, ocl.total_velocity,
                                1, NULL, global, local, 0, NULL, NULL);

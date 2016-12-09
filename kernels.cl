@@ -184,20 +184,39 @@ kernel void total_velocity(
    global t_speed* cells, 
    global int* 	   obstacles,                                                       
    local  float*   local_sums,                          
-   global float*   partial_sums,
-   int             n)                        
+   global float*   partial_sums)                        
 {                                                          
-   int local_size = get_local_size(0);
-   int ii  = get_global_id(0) + get_local_id(0);                   
-
-   float accum = 0.0f;                              
-
-   if (!obstacles[ii])
-     for (int kk = 0; kk < NSPEEDS; kk++)  
-       accum += cells[ii].speeds[kk];  
-
+   int ii = get_global_id(0);
    int local_id = get_local_id(0);
-   local_sums[local_id] = accum;
+
+   float vel = 0.0f;                              
+
+   if (!obstacles[ii]) {
+     float local_density = 0.0;
+
+     for (int kk = 0; kk < NSPEEDS; kk++)
+     {
+       local_density += cells[ii].speeds[kk];
+     }
+
+     float u_x = (cells[ii].speeds[1]
+                   + cells[ii].speeds[5]
+                   + cells[ii].speeds[8]
+                   - (cells[ii].speeds[3]
+                      + cells[ii].speeds[6]
+                      + cells[ii].speeds[7]));
+
+     float u_y = (cells[ii].speeds[2]
+                   + cells[ii].speeds[5]
+                   + cells[ii].speeds[6]
+                   - (cells[ii].speeds[4]
+                      + cells[ii].speeds[7]
+                      + cells[ii].speeds[8]));
+
+     vel= sqrt((u_x * u_x) + (u_y * u_y)) / local_density;
+   }
+
+   local_sums[local_id] = vel;
    barrier(CLK_LOCAL_MEM_FENCE);
    
    reduce(local_sums, partial_sums);                  
