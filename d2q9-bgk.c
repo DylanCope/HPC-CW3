@@ -116,7 +116,7 @@ typedef struct
 */
 
 /* load params, allocate memory, load obstacles & initialise fluid particle densities */
-int initialise(const char* paramfile, const char* obstaclefile,
+int initialise(int argc, char* argv[], const char* paramfile, const char* obstaclefile,
                t_param* params, t_speed** cells_ptr, t_speed** tmp_cells_ptr,
                int** obstacles_ptr, float** av_vels_ptr, t_ocl* ocl);
 
@@ -178,7 +178,7 @@ int main(int argc, char* argv[])
 
   printf("Main function entered\n");
   /* parse the command line */
-  if (argc != 3)
+  if (argc < 3)
   {
     usage(argv[0]);
   }
@@ -189,7 +189,7 @@ int main(int argc, char* argv[])
   }
   printf("Initialising data structures and loading values from file\n");
   /* initialise our data structures and load values from file */
-  initialise(paramfile, obstaclefile, &params, &cells, &tmp_cells, &obstacles, &av_vels, &ocl);
+  initialise(argc, argv, paramfile, obstaclefile, &params, &cells, &tmp_cells, &obstacles, &av_vels, &ocl);
 
   /* iterate for maxIters timesteps */
   gettimeofday(&timstr, NULL);
@@ -454,7 +454,7 @@ float av_velocity(const t_param params, t_speed* cells, int* obstacles, t_ocl oc
   return tot_u / (float)tot_cells;
 }
 
-int initialise(const char* paramfile, const char* obstaclefile,
+int initialise(int argc, char* argv[], const char* paramfile, const char* obstaclefile,
                t_param* params, t_speed** cells_ptr, t_speed** tmp_cells_ptr,
                int** obstacles_ptr, float** av_vels_ptr, t_ocl *ocl)
 {
@@ -687,7 +687,8 @@ int initialise(const char* paramfile, const char* obstaclefile,
   err = clGetKernelWorkGroupInfo (ocl->total_velocity, ocl->device, 
     CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &ocl->work_group_size, NULL);
   checkError(err, "Getting kernel work group info", __LINE__);
-//ocl->work_group_size=128;
+  if (argc > 3)
+    ocl->work_group_size = atoi(argv[3]);
   ocl->nwork_groups = params->nx * params->ny / ocl->work_group_size;
 
   printf("%zu work group(s) of size of %zu.\n", 
