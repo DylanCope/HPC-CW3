@@ -58,15 +58,15 @@ kernel void propagate(global t_speed* cells,
   /* propagate densities to neighbouring cells, following
   ** appropriate directions of travel and writing into
   ** scratch space grid */
-  tmp_cells[ii  * nx + jj ].speeds[0] = cells[ii * nx + jj].speeds[0]; /* central cell, no movement */
-  tmp_cells[ii  * nx + x_e].speeds[1] = cells[ii * nx + jj].speeds[1]; /* east */
-  tmp_cells[y_n * nx + jj ].speeds[2] = cells[ii * nx + jj].speeds[2]; /* north */
-  tmp_cells[ii  * nx + x_w].speeds[3] = cells[ii * nx + jj].speeds[3]; /* west */
-  tmp_cells[y_s * nx + jj ].speeds[4] = cells[ii * nx + jj].speeds[4]; /* south */
-  tmp_cells[y_n * nx + x_e].speeds[5] = cells[ii * nx + jj].speeds[5]; /* north-east */
-  tmp_cells[y_n * nx + x_w].speeds[6] = cells[ii * nx + jj].speeds[6]; /* north-west */
-  tmp_cells[y_s * nx + x_w].speeds[7] = cells[ii * nx + jj].speeds[7]; /* south-west */
-  tmp_cells[y_s * nx + x_e].speeds[8] = cells[ii * nx + jj].speeds[8]; /* south-east */
+  tmp_cells[ii * nx + jj].speeds[0] = cells[ii  * nx + jj ].speeds[0]; /* central cell, no movement */
+  tmp_cells[ii * nx + jj].speeds[1] = cells[ii  * nx + x_w].speeds[1]; /* east */
+  tmp_cells[ii * nx + jj].speeds[2] = cells[y_s * nx + jj ].speeds[2]; /* north */
+  tmp_cells[ii * nx + jj].speeds[3] = cells[ii  * nx + x_e].speeds[3]; /* west */
+  tmp_cells[ii * nx + jj].speeds[4] = cells[y_n * nx + jj ].speeds[4]; /* south */
+  tmp_cells[ii * nx + jj].speeds[5] = cells[y_s * nx + x_w].speeds[5]; /* north-east */
+  tmp_cells[ii * nx + jj].speeds[6] = cells[y_s * nx + x_e].speeds[6]; /* north-west */
+  tmp_cells[ii * nx + jj].speeds[7] = cells[y_n * nx + x_e].speeds[7]; /* south-west */
+  tmp_cells[ii * nx + jj].speeds[8] = cells[y_n * nx + x_w].speeds[8]; /* south-east */
 }
 
 kernel void rebound(global t_speed* cells,
@@ -191,32 +191,31 @@ kernel void total_velocity(
 
    float vel = 0.0f;                              
 
-   if (!obstacles[ii]) {
-     float local_density = 0.0;
+   float local_density = 0.0;
 
-     for (int kk = 0; kk < NSPEEDS; kk++)
-     {
-       local_density += cells[ii].speeds[kk];
-     }
-
-     float u_x = (cells[ii].speeds[1]
-                   + cells[ii].speeds[5]
-                   + cells[ii].speeds[8]
-                   - (cells[ii].speeds[3]
-                      + cells[ii].speeds[6]
-                      + cells[ii].speeds[7]));
-
-     float u_y = (cells[ii].speeds[2]
-                   + cells[ii].speeds[5]
-                   + cells[ii].speeds[6]
-                   - (cells[ii].speeds[4]
-                      + cells[ii].speeds[7]
-                      + cells[ii].speeds[8]));
-
-     vel= sqrt((u_x * u_x) + (u_y * u_y)) / local_density;
+   for (int kk = 0; kk < NSPEEDS; kk++)
+   {
+     local_density += cells[ii].speeds[kk];
    }
 
-   local_sums[local_id] = vel;
+   float u_x = (cells[ii].speeds[1]
+                 + cells[ii].speeds[5]
+                 + cells[ii].speeds[8]
+                 - (cells[ii].speeds[3]
+                    + cells[ii].speeds[6]
+                    + cells[ii].speeds[7]));
+
+   float u_y = (cells[ii].speeds[2]
+                 + cells[ii].speeds[5]
+                 + cells[ii].speeds[6]
+                 - (cells[ii].speeds[4]
+                    + cells[ii].speeds[7]
+                    + cells[ii].speeds[8]));
+
+   vel= sqrt((u_x * u_x) + (u_y * u_y)) / local_density;
+
+   float mask = !obstacles[ii] ? 1 : 0;
+   local_sums[local_id] = mask * vel;
    barrier(CLK_LOCAL_MEM_FENCE);
    
    reduce(local_sums, partial_sums);                  
