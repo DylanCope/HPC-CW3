@@ -40,4 +40,4 @@ echo "Using GPU at index $device"
 numcores=`wc $PBS_NODEFILE | awk '{ print $1 }'`
 
 #! Run the executable
-nvprof $application $options
+$application $options
