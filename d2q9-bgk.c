@@ -15,7 +15,7 @@
 ** A 2D grid:
 **
 **           cols
-**       --- --- ---
+// **       --- --- ---
 **      | D | E | F |
 ** rows  --- --- ---
 **      | A | B | C |
@@ -250,7 +250,7 @@ float total_cells(int* obstacles, int n)
   return tot;
 }
 
-int timestep(const t_param params, float* cells, float tmp_cells, int* obstacles, t_ocl ocl)
+int timestep(const t_param params, float* cells, float* tmp_cells, int* obstacles, t_ocl ocl)
 {
 
   accelerate_flow(params, cells, obstacles, ocl);
@@ -260,7 +260,7 @@ int timestep(const t_param params, float* cells, float tmp_cells, int* obstacles
   return EXIT_SUCCESS;
 }
 
-int accelerate_flow(const t_param params, float cells, int* obstacles, t_ocl ocl)
+int accelerate_flow(const t_param params, float* cells, int* obstacles, t_ocl ocl)
 {
   cl_int err;
 
@@ -291,7 +291,7 @@ int accelerate_flow(const t_param params, float cells, int* obstacles, t_ocl ocl
   return EXIT_SUCCESS;
 }
 
-int propagate(const t_param params, float cells, float tmp_cells, t_ocl ocl)
+int propagate(const t_param params, float* cells, float* tmp_cells, t_ocl ocl)
 {
   cl_int err;
 
@@ -320,7 +320,7 @@ int propagate(const t_param params, float cells, float tmp_cells, t_ocl ocl)
   return EXIT_SUCCESS;
 }
 
-int rebound(const t_param params, float cells, float tmp_cells, int* obstacles, t_ocl ocl)
+int rebound(const t_param params, float* cells, float* tmp_cells, int* obstacles, t_ocl ocl)
 {
 
   cl_int err;
@@ -353,7 +353,7 @@ int rebound(const t_param params, float cells, float tmp_cells, int* obstacles, 
   return EXIT_SUCCESS;
 }
 
-float tot_velocity(const t_param params, float cells, int* obstacles, t_ocl ocl)
+float tot_velocity(const t_param params, float* cells, int* obstacles, t_ocl ocl)
 {
   cl_int err;
 
@@ -399,7 +399,7 @@ float tot_velocity(const t_param params, float cells, int* obstacles, t_ocl ocl)
   return tot_u;
 }
 
-float av_velocity(const t_param params, float cells, int* obstacles, t_ocl ocl)
+float av_velocity(const t_param params, float* cells, int* obstacles, t_ocl ocl)
 {
   int tot_cells = 0;  /* no. of cells used in calculation */
   float tot_u;          /* accumulated magnitudes of velocity for each cell */
@@ -448,7 +448,7 @@ float av_velocity(const t_param params, float cells, int* obstacles, t_ocl ocl)
 }
 
 int initialise(int argc, char* argv[], const char* paramfile, const char* obstaclefile,
-               t_param* params, float* cells_ptr, float* tmp_cells_ptr,
+               t_param* params, float** cells_ptr, float** tmp_cells_ptr,
                int** obstacles_ptr, float** av_vels_ptr, t_ocl *ocl)
 {
   char   message[1024];  /* message buffer */
@@ -769,7 +769,7 @@ float total_density(const t_param params, float* cells)
     for (int jj = 0; jj < params.nx; jj++)
     {
       for (int kk = 0; kk < NSPEEDS; k++)
-        total += cells[ kk*N + ii * params.nx + jj];
+        total += cells[kk*N + ii * params.nx + jj];
     }
   }
 
@@ -810,7 +810,7 @@ int write_values(const t_param params, float* cells, int* obstacles, float* av_v
         local_density = 0.0;
 
         for (int kk = 0; kk < NSPEEDS; k++)
-          local_density += cells[ kk*N + ii * params.nx + jj];
+          local_density += cells[kk*N + ii * params.nx + jj];
 
         /* x-component of velocity */
         u_x = (cells[1*N + ii * params.nx + jj]
