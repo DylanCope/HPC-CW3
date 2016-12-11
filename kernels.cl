@@ -2,12 +2,7 @@
 
 #define NSPEEDS 9
 
-typedef struct
-{
-  float speeds[NSPEEDS];
-} t_speed;
-
-kernel void accelerate_flow(global t_speed* cells,
+kernel void accelerate_flow(global float* cells,
                             global int* obstacles,
                             int nx, int ny,
                             float density, float accel)
@@ -35,13 +30,13 @@ kernel void accelerate_flow(global t_speed* cells,
     cells[8*N + ii * nx + jj] += w2;
     /* decrease 'west-side' densities */
     cells[3*N + ii * nx + jj] -= w1;
-    cells[5*N + ii * nx + jj] -= w2;
-    cells[8*N + ii * nx + jj] -= w2;
+    cells[6*N + ii * nx + jj] -= w2;
+    cells[7*N + ii * nx + jj] -= w2;
   }
 }
 
-kernel void propagate(global t_speed* cells,
-                      global t_speed* tmp_cells,
+kernel void propagate(global float* cells,
+                      global float* tmp_cells,
                       global int* obstacles,
                       int nx, int ny)
 {
@@ -49,6 +44,7 @@ kernel void propagate(global t_speed* cells,
   int jj = get_global_id(0);
   int ii = get_global_id(1);
   const int N = nx*ny;
+
   /* determine indices of axis-direction neighbours
   ** respecting periodic boundary conditions (wrap around) */
   int y_n = (ii + 1) % ny;
@@ -58,7 +54,7 @@ kernel void propagate(global t_speed* cells,
   /* propagate densities to neighbouring cells, following
   ** appropriate directions of travel and writing into
   ** scratch space grid */
-  tmp_cells[0*N + ii * nx + jj] = cells[0*N + ii  * nx + jj ]; /* central cell, no movement */
+  tmp_cells[0*N + ii * nx + jj] = cells[0*N + ii  * nx + jj ]; /* central cell */
   tmp_cells[1*N + ii * nx + jj] = cells[1*N + ii  * nx + x_w]; /* east */
   tmp_cells[2*N + ii * nx + jj] = cells[2*N + y_s * nx + jj ]; /* north */
   tmp_cells[3*N + ii * nx + jj] = cells[3*N + ii  * nx + x_e]; /* west */
@@ -69,8 +65,8 @@ kernel void propagate(global t_speed* cells,
   tmp_cells[8*N + ii * nx + jj] = cells[8*N + y_n * nx + x_w]; /* south-east */
 }
 
-kernel void rebound(global t_speed* cells,
-		    global t_speed* tmp_cells,
+kernel void rebound(global float* cells,
+		    global float* tmp_cells,
 		    global int* obstacles,
 		    int nx, int ny,
  		    float omega)
@@ -98,24 +94,26 @@ kernel void rebound(global t_speed* cells,
   {
     float local_density = 0.0;
 
-    for (int kk = 0; kk < NSPEEDS; k++)
-      local_density += cells[ kk*N + ii * params.nx + jj];
+    for (int kk = 0; kk < NSPEEDS; kk++)
+      local_density += tmp_cells[kk*N + ii * nx + jj];
 
     /* x-component of velocity */
-    float u_x = (cells[1*N + ii * params.nx + jj]
-               + cells[5*N + ii * params.nx + jj]
-               + cells[8*N + ii * params.nx + jj]
-               - (cells[3*N + ii * params.nx + jj]
-                  + cells[6*N + ii * params.nx + jj]
-                  + cells[7*N + ii * params.nx + jj]));
+    float u_x = (tmp_cells[1*N + ii * nx + jj]
+               + tmp_cells[5*N + ii * nx + jj]
+               + tmp_cells[8*N + ii * nx + jj]
+               - (tmp_cells[3*N + ii * nx + jj]
+                  + tmp_cells[6*N + ii * nx + jj]
+                  + tmp_cells[7*N + ii * nx + jj])) 
+               / local_density;
 
     /* compute y velocity component */
-    float u_y = (cells[2*N + ii * params.nx + jj]
-               + cells[5*N + ii * params.nx + jj]
-               + cells[6*N + ii * params.nx + jj]
-               - (cells[4*N + ii * params.nx + jj]
-                  + cells[7*N + ii * params.nx + jj]
-                  + cells[8*N + ii * params.nx + jj]));
+    float u_y = (tmp_cells[2*N + ii * nx + jj]
+               + tmp_cells[5*N + ii * nx + jj]
+               + tmp_cells[6*N + ii * nx + jj]
+               - (tmp_cells[4*N + ii * nx + jj]
+                  + tmp_cells[7*N + ii * nx + jj]
+                  + tmp_cells[8*N + ii * nx + jj])) 
+               / local_density;
 
     /* velocity squared */
     float u_sq = u_x * u_x + u_y * u_y;
@@ -176,7 +174,7 @@ void reduce(
 
 
 kernel void total_velocity(
-   global t_speed* cells,
+   global float* cells,
    global int* 	   obstacles,
    local  float*   local_sums,
    global float*   partial_sums,
@@ -189,26 +187,26 @@ kernel void total_velocity(
    float vel = 0.0f;
    float local_density = 0.0;
 
-   for (int kk = 0; kk < NSPEEDS; k++)
-     local_density += cells[ kk*N + ii * params.nx + jj];
+   for (int kk = 0; kk < NSPEEDS; kk++)
+     local_density += cells[kk*N + ii];
 
    /* x-component of velocity */
-   float u_x = (cells[1*N + ii * params.nx + jj]
-                 + cells[5*N + ii * params.nx + jj]
-                 + cells[8*N + ii * params.nx + jj]
-                 - (cells[3*N + ii * params.nx + jj]
-                    + cells[6*N + ii * params.nx + jj]
-                    + cells[7*N + ii * params.nx + jj]));
+   float u_x = (cells[1*N + ii]
+                 + cells[5*N + ii]
+                 + cells[8*N + ii]
+                 - (cells[3*N + ii]
+                    + cells[6*N + ii]
+                    + cells[7*N + ii]));
    /* compute y velocity component */
-   float u_y = (cells[2*N + ii * params.nx + jj]
-                 + cells[5*N + ii * params.nx + jj]
-                 + cells[6*N + ii * params.nx + jj]
-                 - (cells[4*N + ii * params.nx + jj]
-                    + cells[7*N + ii * params.nx + jj]
-                    + cells[8*N + ii * params.nx + jj]));
+   float u_y = (cells[2*N + ii]
+                 + cells[5*N + ii]
+                 + cells[6*N + ii]
+                 - (cells[4*N + ii]
+                    + cells[7*N + ii]
+                    + cells[8*N + ii]));
 
    /* accumulate the norm of x- and y- velocity components */
-   vel += sqrt((u_x * u_x) + (u_y * u_y)) / local_density;
+   vel = sqrt((u_x * u_x) + (u_y * u_y)) / local_density;
    float mask = !obstacles[ii] ? 1 : 0;
    local_sums[local_id] = mask * vel;
    barrier(CLK_LOCAL_MEM_FENCE);

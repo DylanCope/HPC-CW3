@@ -1,11 +1,10 @@
 Running on host node46-002
-Time is Fri Dec 9 19:42:49 GMT 2016
+Time is Sun Dec 11 03:58:54 GMT 2016
 Directory is /panfs/panasas01/cosc/dc14770/CW3
-PBS job ID is 5236795.master.cm.cluster
+PBS job ID is 5241855.master.cm.cluster
 This jobs runs on the following machines:
 node46-002
 Using GPU at index 0
-==72657== NVPROF is profiling process 72657, command: ./d2q9-bgk input_128x128.params obstacles_128x128.dat 128
 Main function entered
 Initialising data structures and loading values from file
 
@@ -22,12 +21,6 @@ Creating kernels
 Finished initialisation, now computing timesteps.
 ==done==
 Reynolds number:		9.754215240479E+00
-Elapsed time:			6.047970 (s)
-Elapsed user CPU time:		6.347035 (s)
-Elapsed system CPU time:	0.872867 (s)
-==72657== Profiling application: ./d2q9-bgk input_128x128.params obstacles_128x128.dat 128
-==72657== Profiling result:
-No kernels were profiled.
-
-==72657== API calls:
-No API activities were profiled.
+Elapsed time:			3.865419 (s)
+Elapsed user CPU time:		4.583303 (s)
+Elapsed system CPU time:	0.462929 (s)
