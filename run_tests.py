@@ -20,7 +20,7 @@ except:
 if not os.path.exists( folder ):
 	os.makedirs( folder )
 
-sleeptime = 60
+sleeptime = 0
 print( sys.version )
 
 def run_test( wgs, dim ):
@@ -51,7 +51,7 @@ def run_test( wgs, dim ):
 
 
 
-work_group_sizes = [ 1, 2, 4, 8, 16, 32, 64, 128, 256, 512 ] #range( 2, 25, 2 )
+work_group_sizes = [ 128 ]
 dimens = [ '128x128', '128x256', '256x256', '1024x1024' ]
 params = product( work_group_sizes, dimens )
 
