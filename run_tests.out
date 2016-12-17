@@ -1,8 +1,8 @@
-Running on host node46-002
-Time is Sat Dec 17 19:50:04 GMT 2016
+Running on host node31-029
+Time is Sat Dec 17 20:02:56 GMT 2016
 Directory is /panfs/panasas01/cosc/dc14770/CW3
-PBS job ID is 5279539.master.cm.cluster
+PBS job ID is 5279575.master.cm.cluster
 This jobs runs on the following machines:
-node46-002
+node31-029
 3.3.2 (default, Mar 13 2014, 15:21:19) 
 [GCC 4.4.7 20120313 (Red Hat 4.4.7-3)]

@@ -1,0 +1,8 @@
+Running on host node46-002
+Time is Sat Dec 17 20:03:28 GMT 2016
+Directory is /panfs/panasas01/cosc/dc14770/CW3
+PBS job ID is 5279577.master.cm.cluster
+This jobs runs on the following machines:
+node46-002
+Using GPU at index 1
+=>> PBS: job killed: walltime 612 exceeded limit 600
