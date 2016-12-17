@@ -261,7 +261,7 @@ int timestep(const t_param params, float* cells, float* tmp_cells, int* obstacle
 
   accelerate_flow(params, cells, obstacles, ocl);
   propagate(params, cells, tmp_cells, ocl);
-  rebound(params, cells, tmp_cells, obstacles, ocl);
+//  rebound(params, cells, tmp_cells, obstacles, ocl);
 
   return EXIT_SUCCESS;
 }
@@ -365,15 +365,19 @@ float tot_velocity(const t_param params, float* cells, int* obstacles, t_ocl ocl
 
   err = clSetKernelArg(ocl.total_velocity, 0, sizeof(cl_mem), &ocl.cells);
   checkError(err, "setting total_velocity arg 0", __LINE__);
-  err = clSetKernelArg(ocl.total_velocity, 1, sizeof(cl_mem), &ocl.obstacles);
+  err = clSetKernelArg(ocl.total_velocity, 1, sizeof(cl_mem), &ocl.tmp_cells);
+  checkError(err, "setting total_velocity arg 0", __LINE__);
+  err = clSetKernelArg(ocl.total_velocity, 2, sizeof(cl_mem), &ocl.obstacles);
   checkError(err, "setting total_velocity arg 1", __LINE__);
-  err = clSetKernelArg(ocl.total_velocity, 2, sizeof(cl_float) * ocl.work_group_size, NULL);
+  err = clSetKernelArg(ocl.total_velocity, 3, sizeof(cl_float) * ocl.work_group_size, NULL);
   checkError(err, "setting total_velocity arg 2", __LINE__);
-  err = clSetKernelArg(ocl.total_velocity, 3, sizeof(cl_mem), &ocl.d_partial_sums);
+  err = clSetKernelArg(ocl.total_velocity, 4, sizeof(cl_mem), &ocl.d_partial_sums);
   checkError(err, "setting total_velocity arg 3", __LINE__);
-  err = clSetKernelArg(ocl.total_velocity, 4, sizeof(cl_int), &params.nx);
+  err = clSetKernelArg(ocl.total_velocity, 5, sizeof(cl_int), &params.nx);
   checkError(err, "setting total_velocity arg 4", __LINE__);
-  err = clSetKernelArg(ocl.total_velocity, 5, sizeof(cl_int), &params.ny);
+  err = clSetKernelArg(ocl.total_velocity, 6, sizeof(cl_int), &params.ny);
+  checkError(err, "setting total_velocity arg 5", __LINE__);
+  err = clSetKernelArg(ocl.total_velocity, 7, sizeof(cl_float), &params.omega);
   checkError(err, "setting total_velocity arg 5", __LINE__);
 
   // Enqueue kernel
