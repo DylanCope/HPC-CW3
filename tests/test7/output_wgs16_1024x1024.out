@@ -1,0 +1,8 @@
+Running on host node47-010
+Time is Sat Dec 17 23:13:58 GMT 2016
+Directory is /panfs/panasas01/cosc/dc14770/CW3
+PBS job ID is 5280050.master.cm.cluster
+This jobs runs on the following machines:
+node47-010
+Using GPU at index 1
+/cm/local/apps/torque/4.2.4.1/spool/mom_priv/jobs/5280050.master.cm.cluster.SC: line 43: 68086 Segmentation fault      $application $options

@@ -5,6 +5,7 @@ import os
 import time
 import math 
 from itertools import chain, product
+from random import shuffle
 
 try:
 	folder = sys.argv[ 1 ]
@@ -20,7 +21,6 @@ except:
 if not os.path.exists( folder ):
 	os.makedirs( folder )
 
-sleeptime = 0
 print( sys.version )
 
 def run_test( wgs, dim ):
@@ -51,11 +51,19 @@ def run_test( wgs, dim ):
 
 
 
-work_group_sizes = [ 2**i for i in range(0, 11, 2) ] #[ 128 ]
-dimens = [ '1024x1024' ] #[ '128x128', '128x256', '256x256', '1024x1024' ]
-params = product( work_group_sizes, dimens )
+work_group_sizes = [ 2**i for i in range(0, 11) ] #[ 128 ]
+dimens = [ '128x128', '128x256', '256x256', '1024x1024' ]
+params = list(product( work_group_sizes, dimens ))
+shuffle(params)
 
+sleeptime = 60
+burst = 4
+burst_counter = 0
 for wgs, dim in params:
+	if burst_counter == burst:
+		time.sleep( sleeptime )
+		burst_counter = 0
+	burst_counter += 1
 	run_test( wgs, dim )
-	time.sleep( sleeptime )
+
 
