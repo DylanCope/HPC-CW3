@@ -1,7 +1,7 @@
 Running on host node46-002
-Time is Sat Dec 17 19:49:32 GMT 2016
+Time is Sat Dec 17 19:50:36 GMT 2016
 Directory is /panfs/panasas01/cosc/dc14770/CW3
-PBS job ID is 5279537.master.cm.cluster
+PBS job ID is 5279541.master.cm.cluster
 This jobs runs on the following machines:
 node46-002
 Using GPU at index 0
@@ -17,10 +17,10 @@ Selected OpenCL device:
 
 Creating program with source
 Creating kernels
-128 work group(s) of size of 128.
+256 work group(s) of size of 128.
 Finished initialisation, now computing timesteps.
 ==done==
-Reynolds number:		9.754215240479E+00
-Elapsed time:			3.220259 (s)
-Elapsed user CPU time:		3.943400 (s)
-Elapsed system CPU time:	0.463929 (s)
+Reynolds number:		3.717322158813E+01
+Elapsed time:			4.497230 (s)
+Elapsed user CPU time:		5.053231 (s)
+Elapsed system CPU time:	0.647901 (s)
