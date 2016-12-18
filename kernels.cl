@@ -19,20 +19,20 @@ kernel void accelerate_flow(global float* cells,
 
   /* if the cell is not occupied and
   ** we don't send a negative density */
-  float b1 = !obstacles[ii * nx + jj];
-  float b2 = (cells[3*N + ii * nx + jj] - w1) > 0.0;
-  float b3 = (cells[6*N + ii * nx + jj] - w2) > 0.0;
-  float b4 = (cells[7*N + ii * nx + jj] - w2) > 0.0;
-  float mask = b1 && b2 && b3 && b4;
-
-  /* increase 'east-side' densities */
-  cells[1*N + ii * nx + jj] += mask*w1;
-  cells[5*N + ii * nx + jj] += mask*w2;
-  cells[8*N + ii * nx + jj] += mask*w2;
-  /* decrease 'west-side' densities */
-  cells[3*N + ii * nx + jj] -= mask*w1;
-  cells[6*N + ii * nx + jj] -= mask*w2;
-  cells[7*N + ii * nx + jj] -= mask*w2;
+  if (!obstacles[ii * nx + jj];
+      && (cells[3*N + ii * nx + jj] - w1) > 0.0
+      && (cells[6*N + ii * nx + jj] - w2) > 0.0
+      && (cells[7*N + ii * nx + jj] - w2) > 0.0)
+  {
+    /* increase 'east-side' densities */
+    cells[1*N + ii * nx + jj] += w1;
+    cells[5*N + ii * nx + jj] += w2;
+    cells[8*N + ii * nx + jj] += w2;
+    /* decrease 'west-side' densities */
+    cells[3*N + ii * nx + jj] -= w1;
+    cells[6*N + ii * nx + jj] -= w2;
+    cells[7*N + ii * nx + jj] -= w2;
+  }
 }
 
 kernel void propagate(global float* cells,

@@ -1,0 +1,36 @@
+Running on host node46-002
+Time is Sun Dec 18 03:00:39 GMT 2016
+Directory is /panfs/panasas01/cosc/dc14770/CW3
+PBS job ID is 5280394.master.cm.cluster
+This jobs runs on the following machines:
+node46-002
+Using GPU at index 0
+
+OpenCL build log:
+
+<kernel>:22:31: error: expected ')'
+  if (!obstacles[ii * nx + jj];
+                              ^
+<kernel>:22:6: note: to match this '('
+  if (!obstacles[ii * nx + jj];
+     ^
+<kernel>:22:31: warning: if statement has empty body
+  if (!obstacles[ii * nx + jj];
+                              ^
+<kernel>:22:31: note: put the semicolon on a separate line to silence this warning
+<kernel>:23:10: error: expected identifier
+      && (cells[3*N + ii * nx + jj] - w1) > 0.0
+         ^
+
+OpenCL error during 'building program' on line 631: -11
+Main function entered
+Initialising data structures and loading values from file
+
+Available OpenCL devices:
+ 0: Tesla K20m
+ 1: Tesla K20m
+
+Selected OpenCL device:
+-> Tesla K20m (index=0)
+
+Creating program with source
