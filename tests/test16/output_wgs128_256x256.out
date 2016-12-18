@@ -1,0 +1,11 @@
+Running on host node47-008
+Time is Sun Dec 18 04:07:43 GMT 2016
+Directory is /panfs/panasas01/cosc/dc14770/CW3
+PBS job ID is 5280507.master.cm.cluster
+This jobs runs on the following machines:
+node47-008
+Using GPU at index 0
+Error at line 555 of file d2q9-bgk.c:
+could not open input obstacles file: ./tests/test16/obs_256x256_0.20.dat
+Main function entered
+Initialising data structures and loading values from file

@@ -19,7 +19,7 @@ export OCL_DEVICE=$device
 application="./d2q9-bgk"
 
 #! Run options for the application
-options="input_%s.params obstacles_%s.dat %d"
+options="input_%s.params %s %d"
 
 ###############################################################
 ### You should not have to change anything below this line ####
