@@ -181,10 +181,6 @@ int main(int argc, char* argv[])
   /* initialise our data structures and load values from file */
   initialise(argc, argv, paramfile, obstaclefile, &params, &cells, &tmp_cells, &obstacles, &av_vels, &ocl);
 
-  /* iterate for maxIters timesteps */
-  gettimeofday(&timstr, NULL);
-  tic = timstr.tv_sec + (timstr.tv_usec / 1000000.0);
-
   // Write cells to OpenCL buffer
   err = clEnqueueWriteBuffer(
     ocl.queue, ocl.cells, CL_TRUE, 0,
@@ -198,7 +194,14 @@ int main(int argc, char* argv[])
   checkError(err, "writing obstacles data", __LINE__);
 
   float tot_cells = total_cells(obstacles, params.nx * params.ny);
+  float N = (float) (params.nx * params.ny);
+  printf("%.2f percent of the input grid is not obstacles.\n", 100.0 * tot_cells / N );
   printf("Finished initialisation, now computing timesteps.\n");
+
+
+  /* iterate for maxIters timesteps */
+  gettimeofday(&timstr, NULL);
+  tic = timstr.tv_sec + (timstr.tv_usec / 1000000.0);
 
   for (int tt = 0; tt < params.maxIters; tt++)
   {

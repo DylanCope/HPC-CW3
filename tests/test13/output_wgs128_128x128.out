@@ -1,0 +1,8 @@
+Running on host node47-002
+Time is Sun Dec 18 03:34:15 GMT 2016
+Directory is /panfs/panasas01/cosc/dc14770/CW3
+PBS job ID is 5280452.master.cm.cluster
+This jobs runs on the following machines:
+node47-002
+Using GPU at index 1
+/cm/local/apps/torque/4.2.4.1/spool/mom_priv/jobs/5280452.master.cm.cluster.SC: line 43: ./d2q9-bgk: No such file or directory
