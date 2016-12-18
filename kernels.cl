@@ -86,7 +86,7 @@ kernel void total_velocity(
   const float w0 = 4.0 / 9.0;  /* weighting factor */
   const float w1 = 1.0 / 9.0;  /* weighting factor */
   const float w2 = 1.0 / 36.0; /* weighting factor */
- 
+
   float local_density = 0.0;
 
   for (int kk = 0; kk < NSPEEDS; kk++)
@@ -98,7 +98,7 @@ kernel void total_velocity(
              + tmp_cells[8*N + ii]
              - (tmp_cells[3*N + ii]
                 + tmp_cells[6*N + ii]
-                + tmp_cells[7*N + ii])) 
+                + tmp_cells[7*N + ii]))
              / local_density;
 
   /* compute y velocity component */
@@ -107,7 +107,7 @@ kernel void total_velocity(
              + tmp_cells[6*N + ii]
              - (tmp_cells[4*N + ii]
                 + tmp_cells[7*N + ii]
-                + tmp_cells[8*N + ii])) 
+                + tmp_cells[8*N + ii]))
              / local_density;
 
   /* velocity squared */
@@ -156,52 +156,52 @@ kernel void total_velocity(
   /* relaxation step */
 
 
-  cells[0*N + ii] = obstacles[ii] * (
-			cells[0*N + ii]) + !obstacles[ii] * (
+  cells[0*N + ii] = obstacles[ii] ?
+			cells[0*N + ii] :
 			tmp_cells[0*N + ii]
 			+ omega
-			* (d_equ[0] - tmp_cells[0*N + ii])); 
-  cells[1*N + ii] = obstacles[ii] * ( 
-			tmp_cells[3*N + ii]) + !obstacles[ii] * (
+			* (d_equ[0] - tmp_cells[0*N + ii]);
+  cells[1*N + ii] = obstacles[ii] ?
+			tmp_cells[3*N + ii] :
  			tmp_cells[1*N + ii]
                        	+ omega
-                       	* (d_equ[1] - tmp_cells[1*N + ii]));
-  cells[2*N + ii] = obstacles[ii] * ( 
-			tmp_cells[4*N + ii]) + !obstacles[ii] * (
+                       	* (d_equ[1] - tmp_cells[1*N + ii]);
+  cells[2*N + ii] = obstacles[ii] ?
+			tmp_cells[4*N + ii] :
  			tmp_cells[2*N + ii]
                        	+ omega
-                       	* (d_equ[2] - tmp_cells[2*N + ii]));
-  cells[3*N + ii] = obstacles[ii] * (
-			tmp_cells[1*N + ii]) + !obstacles[ii] * (
+                       	* (d_equ[2] - tmp_cells[2*N + ii]);
+  cells[3*N + ii] = obstacles[ii] ?
+			tmp_cells[1*N + ii] :
  			tmp_cells[3*N + ii]
                        	+ omega
-                       	* (d_equ[3] - tmp_cells[3*N + ii]));
-  cells[4*N + ii] = obstacles[ii] * (
-			tmp_cells[2*N + ii]) + !obstacles[ii] * (
+                       	* (d_equ[3] - tmp_cells[3*N + ii]);
+  cells[4*N + ii] = obstacles[ii] ?
+			tmp_cells[2*N + ii] :
  			tmp_cells[4*N + ii]
                        	+ omega
-                       	* (d_equ[4] - tmp_cells[4*N + ii]));
-  cells[5*N + ii] = obstacles[ii] * (
-			tmp_cells[7*N + ii]) + !obstacles[ii] * (
+                       	* (d_equ[4] - tmp_cells[4*N + ii]);
+  cells[5*N + ii] = obstacles[ii] ?
+			tmp_cells[7*N + ii] :
  			tmp_cells[5*N + ii]
                        	+ omega
-                       	* (d_equ[5] - tmp_cells[5*N + ii]));
-  cells[6*N + ii] = obstacles[ii] * (
-			tmp_cells[8*N + ii]) + !obstacles[ii] * (
+                       	* (d_equ[5] - tmp_cells[5*N + ii]);
+  cells[6*N + ii] = obstacles[ii] ?
+			tmp_cells[8*N + ii] :
  			tmp_cells[6*N + ii]
                        	+ omega
-                       	* (d_equ[6] - tmp_cells[6*N + ii]));
-  cells[7*N + ii] = obstacles[ii] * (  
-			tmp_cells[5*N + ii]) + !obstacles[ii] * (
+                       	* (d_equ[6] - tmp_cells[6*N + ii]);
+  cells[7*N + ii] = obstacles[ii] ?
+			tmp_cells[5*N + ii] :
  			tmp_cells[7*N + ii]
                        	+ omega
-                       	* (d_equ[7] - tmp_cells[7*N + ii]));
-  cells[8*N + ii] = obstacles[ii] * ( 
-			tmp_cells[6*N + ii]) + !obstacles[ii] * (
+                       	* (d_equ[7] - tmp_cells[7*N + ii]);
+  cells[8*N + ii] = obstacles[ii] ?
+			tmp_cells[6*N + ii] :
  			tmp_cells[8*N + ii]
                        	+ omega
-                       	* (d_equ[8] - tmp_cells[8*N + ii]));
- 
+                       	* (d_equ[8] - tmp_cells[8*N + ii]);
+
   /* compute new velocity */
   local_density = 0.0;
 
@@ -214,7 +214,7 @@ kernel void total_velocity(
              + cells[8*N + ii]
              - (cells[3*N + ii]
                 + cells[6*N + ii]
-                + cells[7*N + ii])) 
+                + cells[7*N + ii]))
              ;
 
   /* compute y velocity component */
@@ -223,7 +223,7 @@ kernel void total_velocity(
              + cells[6*N + ii]
              - (cells[4*N + ii]
                 + cells[7*N + ii]
-                + cells[8*N + ii])) 
+                + cells[8*N + ii]))
              ;
 
   /* velocity squared */
