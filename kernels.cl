@@ -19,7 +19,7 @@ kernel void accelerate_flow(global float* cells,
 
   /* if the cell is not occupied and
   ** we don't send a negative density */
-  if (!obstacles[ii * nx + jj];
+  if (!obstacles[ii * nx + jj]
       && (cells[3*N + ii * nx + jj] - w1) > 0.0
       && (cells[6*N + ii * nx + jj] - w2) > 0.0
       && (cells[7*N + ii * nx + jj] - w2) > 0.0)
