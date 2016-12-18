@@ -51,12 +51,12 @@ def run_test( wgs, dim ):
 
 
 
-work_group_sizes = [ 2**i for i in range(0, 11) ] #[ 128 ]
+work_group_sizes = [ 128 ]
 dimens = [ '128x128', '128x256', '256x256', '1024x1024' ]
 params = list(product( work_group_sizes, dimens ))
 shuffle(params)
 
-sleeptime = 60
+sleeptime = 0
 burst = 4
 burst_counter = 0
 for wgs, dim in params:

@@ -1,0 +1,22 @@
+Running on host node47-007
+Time is Sun Dec 18 00:01:27 GMT 2016
+Directory is /panfs/panasas01/cosc/dc14770/CW3
+PBS job ID is 5280120.master.cm.cluster
+This jobs runs on the following machines:
+node47-007
+Using GPU at index 1
+OpenCL error during 'enqueueing total_velocity kernel' on line 353: -54
+Main function entered
+Initialising data structures and loading values from file
+
+Available OpenCL devices:
+ 0: Tesla K20m
+ 1: Tesla K20m
+
+Selected OpenCL device:
+-> Tesla K20m (index=1)
+
+Creating program with source
+Creating kernels
+315 work group(s) of size of 208.
+Finished initialisation, now computing timesteps.

@@ -19,20 +19,20 @@ kernel void accelerate_flow(global float* cells,
 
   /* if the cell is not occupied and
   ** we don't send a negative density */
-  if (!obstacles[ii * nx + jj]
-      && (cells[3*N + ii * nx + jj] - w1) > 0.0
-      && (cells[6*N + ii * nx + jj] - w2) > 0.0
-      && (cells[7*N + ii * nx + jj] - w2) > 0.0)
-  {
-    /* increase 'east-side' densities */
-    cells[1*N + ii * nx + jj] += w1;
-    cells[5*N + ii * nx + jj] += w2;
-    cells[8*N + ii * nx + jj] += w2;
-    /* decrease 'west-side' densities */
-    cells[3*N + ii * nx + jj] -= w1;
-    cells[6*N + ii * nx + jj] -= w2;
-    cells[7*N + ii * nx + jj] -= w2;
-  }
+  float b1 = !obstacles[ii * nx + jj];
+  float b2 = (cells[3*N + ii * nx + jj] - w1) > 0.0;
+  float b3 = (cells[6*N + ii * nx + jj] - w2) > 0.0;
+  float b4 = (cells[7*N + ii * nx + jj] - w2) > 0.0;
+  float mask = b1 && b2 && b3 && b4;
+
+  /* increase 'east-side' densities */
+  cells[1*N + ii * nx + jj] += mask*w1;
+  cells[5*N + ii * nx + jj] += mask*w2;
+  cells[8*N + ii * nx + jj] += mask*w2;
+  /* decrease 'west-side' densities */
+  cells[3*N + ii * nx + jj] -= mask*w1;
+  cells[6*N + ii * nx + jj] -= mask*w2;
+  cells[7*N + ii * nx + jj] -= mask*w2;
 }
 
 kernel void propagate(global float* cells,
@@ -156,51 +156,51 @@ kernel void total_velocity(
   /* relaxation step */
 
 
-  cells[0*N + ii] = obstacles[ii] ?
-			cells[0*N + ii] :
+  cells[0*N + ii] = obstacles[ii] * (
+			cells[0*N + ii]) + !obstacles[ii] * (
 			tmp_cells[0*N + ii]
 			+ omega
-			* (d_equ[0] - tmp_cells[0*N + ii]); 
-  cells[1*N + ii] = obstacles[ii] ? 
-			tmp_cells[3*N + ii] :
+			* (d_equ[0] - tmp_cells[0*N + ii])); 
+  cells[1*N + ii] = obstacles[ii] * ( 
+			tmp_cells[3*N + ii]) + !obstacles[ii] * (
  			tmp_cells[1*N + ii]
                        	+ omega
-                       	* (d_equ[1] - tmp_cells[1*N + ii]);
-  cells[2*N + ii] = obstacles[ii] ? 
-			tmp_cells[4*N + ii] :
+                       	* (d_equ[1] - tmp_cells[1*N + ii]));
+  cells[2*N + ii] = obstacles[ii] * ( 
+			tmp_cells[4*N + ii]) + !obstacles[ii] * (
  			tmp_cells[2*N + ii]
                        	+ omega
-                       	* (d_equ[2] - tmp_cells[2*N + ii]);
-  cells[3*N + ii] = obstacles[ii] ? 
-			tmp_cells[1*N + ii] :
+                       	* (d_equ[2] - tmp_cells[2*N + ii]));
+  cells[3*N + ii] = obstacles[ii] * (
+			tmp_cells[1*N + ii]) + !obstacles[ii] * (
  			tmp_cells[3*N + ii]
                        	+ omega
-                       	* (d_equ[3] - tmp_cells[3*N + ii]);
-  cells[4*N + ii] = obstacles[ii] ? 
-			tmp_cells[2*N + ii] :
+                       	* (d_equ[3] - tmp_cells[3*N + ii]));
+  cells[4*N + ii] = obstacles[ii] * (
+			tmp_cells[2*N + ii]) + !obstacles[ii] * (
  			tmp_cells[4*N + ii]
                        	+ omega
-                       	* (d_equ[4] - tmp_cells[4*N + ii]);
-  cells[5*N + ii] = obstacles[ii] ? 
-			tmp_cells[7*N + ii] :
+                       	* (d_equ[4] - tmp_cells[4*N + ii]));
+  cells[5*N + ii] = obstacles[ii] * (
+			tmp_cells[7*N + ii]) + !obstacles[ii] * (
  			tmp_cells[5*N + ii]
                        	+ omega
-                       	* (d_equ[5] - tmp_cells[5*N + ii]);
-  cells[6*N + ii] = obstacles[ii] ? 
-			tmp_cells[8*N + ii] :
+                       	* (d_equ[5] - tmp_cells[5*N + ii]));
+  cells[6*N + ii] = obstacles[ii] * (
+			tmp_cells[8*N + ii]) + !obstacles[ii] * (
  			tmp_cells[6*N + ii]
                        	+ omega
-                       	* (d_equ[6] - tmp_cells[6*N + ii]);
-  cells[7*N + ii] = obstacles[ii] ? 
-			tmp_cells[5*N + ii] :
+                       	* (d_equ[6] - tmp_cells[6*N + ii]));
+  cells[7*N + ii] = obstacles[ii] * (  
+			tmp_cells[5*N + ii]) + !obstacles[ii] * (
  			tmp_cells[7*N + ii]
                        	+ omega
-                       	* (d_equ[7] - tmp_cells[7*N + ii]);
-  cells[8*N + ii] = obstacles[ii] ? 
-			tmp_cells[6*N + ii] :
+                       	* (d_equ[7] - tmp_cells[7*N + ii]));
+  cells[8*N + ii] = obstacles[ii] * ( 
+			tmp_cells[6*N + ii]) + !obstacles[ii] * (
  			tmp_cells[8*N + ii]
                        	+ omega
-                       	* (d_equ[8] - tmp_cells[8*N + ii]);
+                       	* (d_equ[8] - tmp_cells[8*N + ii]));
  
   /* compute new velocity */
   local_density = 0.0;
@@ -228,9 +228,7 @@ kernel void total_velocity(
 
   /* velocity squared */
   float vel = sqrt(u_x * u_x + u_y * u_y) / local_density;
-
-  float mask = obstacles[ii] ? 0.0 : 1.0;
-  local_sums[local_id] = mask * vel;
+  local_sums[local_id] = !obstacles[ii] * vel;
   barrier(CLK_LOCAL_MEM_FENCE);
 
   reduce(local_sums, partial_sums);
