@@ -1,10 +1,11 @@
 Running on host node46-002
-Time is Sun Dec 18 20:52:05 GMT 2016
+Time is Sun Dec 18 23:49:09 GMT 2016
 Directory is /panfs/panasas01/cosc/dc14770/CW3
-PBS job ID is 5283124.master.cm.cluster
+PBS job ID is 5284071.master.cm.cluster
 This jobs runs on the following machines:
 node46-002
 Using GPU at index 1
+OpenCL error during 'waiting for total_velocity kernel' on line 360: -36
 Main function entered
 Initialising data structures and loading values from file
 
@@ -17,11 +18,6 @@ Selected OpenCL device:
 
 Creating program with source
 Creating kernels
-8192 work group(s) of size of 128.
-99.51 percent of the input grid is not obstacles.
+128 work group(s) of size of 128.
+96.90 percent of the input grid is not obstacles.
 Finished initialisation, now computing timesteps.
-==done==
-Reynolds number:		3.376612901688E+00
-Elapsed time:			28.394735 (s)
-Elapsed user CPU time:		25.326149 (s)
-Elapsed system CPU time:	4.302345 (s)
