@@ -1,9 +1,9 @@
-Running on host node46-002
-Time is Mon Dec 19 02:43:25 GMT 2016
+Running on host node47-007
+Time is Mon Dec 19 02:43:56 GMT 2016
 Directory is /panfs/panasas01/cosc/dc14770/CW3
-PBS job ID is 5284867.master.cm.cluster
+PBS job ID is 5284873.master.cm.cluster
 This jobs runs on the following machines:
-node46-002
+node47-007
 Using GPU at index 0
 Main function entered
 Initialising data structures and loading values from file
@@ -17,11 +17,11 @@ Selected OpenCL device:
 
 Creating program with source
 Creating kernels
-128 work group(s) of size of 128.
-96.90 percent of the input grid is not obstacles.
+8192 work group(s) of size of 128.
+99.51 percent of the input grid is not obstacles.
 Finished initialisation, now computing timesteps.
 ==done==
-Reynolds number:		9.754216194153E+00
-Elapsed time:			2.991125 (s)
-Elapsed user CPU time:		3.771426 (s)
-Elapsed system CPU time:	0.412937 (s)
+Reynolds number:		3.376612901688E+00
+Elapsed time:			24.620349 (s)
+Elapsed user CPU time:		22.104639 (s)
+Elapsed system CPU time:	3.753429 (s)

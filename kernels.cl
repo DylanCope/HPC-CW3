@@ -246,20 +246,63 @@ void reduce(
    __local  float*    local_sums,
    __global float*    partial_sums)
 {
-   int num_wrk_items  = get_local_size(0);
-   int local_id       = get_local_id(0);
-   int group_id       = get_group_id(0);
+  int num_wrk_items  = get_local_size(0);
+  int local_id       = get_local_id(0);
+  int group_id       = get_group_id(0);
 
-   float sum;
-   int i;
+  for (int i = 2; i <= num_wrk_items; i *= 2){
+    if (local_id % i == 0){
+      local_sums[local_id] += local_sums[local_id + i/2];
+    }
+    barrier(CLK_LOCAL_MEM_FENCE);
+  }
 
-   if (local_id == 0) {
-      sum = 0.0f;
+  if (local_id == 0) {
+    partial_sums[group_id] = local_sums[local_id];
+  }
 
-      for (i=0; i<num_wrk_items; i++) {
-          sum += local_sums[i];
-      }
+//if (local_id == 0) {
+// float sum = 0.0f;
 
-      partial_sums[group_id] = sum;
-   }
+// for (int i = 0; i < num_wrk_items; i++) {
+//     sum += local_sums[i];
+// }
+
+// partial_sums[group_id] = sum;
+//}
+
+}
+
+__kernel
+void tree_reduce(__global float* buffer,
+             __local float* scratch,
+             __const int length,
+             __global float* result) {
+
+  int global_index = get_global_id(0);
+  float accumulator = 0.0;
+  // Loop sequentially over chunks of input vector
+  while (global_index < length) {
+    float element = buffer[global_index];
+    accumulator = accumulator + element;
+    global_index += get_global_size(0);
+  }
+
+  // Perform parallel reduction
+  int local_index = get_local_id(0);
+  scratch[local_index] = accumulator;
+  barrier(CLK_LOCAL_MEM_FENCE);
+  for(int offset = get_local_size(0) / 2;
+      offset > 0;
+      offset = offset / 2) {
+    if (local_index < offset) {
+      float other = scratch[local_index + offset];
+      float mine = scratch[local_index];
+      scratch[local_index] = mine + other;
+    }
+    barrier(CLK_LOCAL_MEM_FENCE);
+  }
+  if (local_index == 0) {
+     result[get_group_id(0)] = scratch[0];
+  }
 }

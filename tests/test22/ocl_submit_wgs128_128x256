@@ -1,11 +1,11 @@
 #!/bin/bash
 
-#PBS -N d2q9-bgk
+#PBS -N ocl_wgs128_128x256
 #PBS -joe
-#PBS -o d2q9-bgk.out
+#PBS -o ./tests/test22/output_wgs128_128x256.out
 #PBS -q teaching
 #PBS -l epilogue=~ggdagw/epilogue.sh
-#PBS -l nodes=1:gpus=1,walltime=00:00:30
+#PBS -l nodes=1:gpus=1,walltime=00:10:00
 
 #! Mail to user if job aborts
 #PBS -m a
@@ -19,7 +19,7 @@ export OCL_DEVICE=$device
 application="./d2q9-bgk"
 
 #! Run options for the application
-options="input_128x128.params obstacles_128x128.dat 128"
+options="input_128x256.params obstacles_128x256.dat 128"
 
 ###############################################################
 ### You should not have to change anything below this line ####

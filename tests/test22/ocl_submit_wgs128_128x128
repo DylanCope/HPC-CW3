@@ -1,11 +1,11 @@
 #!/bin/bash
 
-#PBS -N d2q9-bgk
+#PBS -N ocl_wgs128_128x128
 #PBS -joe
-#PBS -o d2q9-bgk.out
+#PBS -o ./tests/test22/output_wgs128_128x128.out
 #PBS -q teaching
 #PBS -l epilogue=~ggdagw/epilogue.sh
-#PBS -l nodes=1:gpus=1,walltime=00:00:30
+#PBS -l nodes=1:gpus=1,walltime=00:10:00
 
 #! Mail to user if job aborts
 #PBS -m a

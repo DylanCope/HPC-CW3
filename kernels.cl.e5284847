@@ -1,0 +1,3 @@
+/cm/local/apps/torque/4.2.4.1/spool/mom_priv/jobs/5284847.master.cm.cluster.SC: line 5: syntax error near unexpected token `('
+/cm/local/apps/torque/4.2.4.1/spool/mom_priv/jobs/5284847.master.cm.cluster.SC: line 5: `kernel void accelerate_flow(global float* cells,'
+Warning: Permanently added 'node33-001,10.131.0.97' (RSA) to the list of known hosts.
