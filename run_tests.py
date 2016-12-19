@@ -73,8 +73,8 @@ def run_test( wgs, dim, obsper = -1 ):
 
 work_group_sizes = [ 128 ]
 obspers = [ 0.1, 0.5, 0.9 ]
-dimens = [ (256, 256) ]#[ (128, 128), (128, 256), (256, 256), (1024, 1024) ]
-params = list(product( work_group_sizes, dimens, obspers ))
+dimens = [ (128, 128), (128, 256), (256, 256), (1024, 1024) ]
+params = list(product( work_group_sizes, dimens ))
 shuffle(params)
 
 sleeptime = 0
