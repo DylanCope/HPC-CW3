@@ -1,8 +1,8 @@
 #!/bin/bash
 
-#PBS -N %s
+#PBS -N ocl_1024x1024
 #PBS -joe
-#PBS -o %s.out
+#PBS -o ./tests/test24/output_1024x1024.out
 #PBS -q teaching
 #PBS -l epilogue=~ggdagw/epilogue.sh
 #PBS -l nodes=1:gpus=1,walltime=00:00:30
@@ -19,7 +19,7 @@ export OCL_DEVICE=$device
 application="./d2q9-bgk"
 
 #! Run options for the application
-options="input_%s.params %s"
+options="input_1024x1024.params obstacles_1024x1024.dat"
 
 ###############################################################
 ### You should not have to change anything below this line ####

@@ -657,6 +657,7 @@ int initialise(int argc, char* argv[], const char* paramfile, const char* obstac
   err = clGetKernelWorkGroupInfo (ocl->total_velocity, ocl->device,
     CL_KERNEL_WORK_GROUP_SIZE, sizeof(size_t), &ocl->work_group_size, NULL);
   checkError(err, "Getting kernel work group info", __LINE__);
+  ocl->work_group_size = 128;
   if (argc > 3)
     ocl->work_group_size = atoi(argv[3]);
   ocl->nwork_groups = N / ocl->work_group_size;

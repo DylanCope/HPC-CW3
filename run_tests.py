@@ -47,11 +47,11 @@ def run_test( wgs, dim, obsper = -1 ):
 		output_file = '%soutput_wgs%d_%s_%f' % (folder, wgs, dimstr, obsper)	
 	else:
 		obstacles = "obstacles_%s.dat" % dimstr
-		output_file = '%soutput_wgs%d_%s' % (folder, wgs, dimstr)
+		output_file = '%soutput_%s' % (folder, dimstr)
 	# dictionary mapping line nums to data to format
-	info = { 3    : ('ocl_wgs%d_%s' % (wgs, dimstr)), \
+	info = { 3    : ('ocl_%s' % (dimstr)), \
                  5    : output_file, \
-		 22   : (dimstr, obstacles, wgs)  }
+		 22   : (dimstr, obstacles)  }
 
 	lines = []
 	with open( 'ocl_submit_template' ) as f:
@@ -59,7 +59,7 @@ def run_test( wgs, dim, obsper = -1 ):
 			l = line % info[ i + 1 ] if i + 1 in info else line
 			lines.append( l )
 		
-	run_filename = '%socl_submit_wgs%i_%s' % ( folder, wgs, dimstr )
+	run_filename = '%socl_submit_%s' % ( folder, dimstr )
 	make_file( run_filename )
 
 	with open( run_filename, 'w+' ) as f:
@@ -71,7 +71,7 @@ def run_test( wgs, dim, obsper = -1 ):
 
 
 
-work_group_sizes = [ 128 ]
+work_group_sizes = [ 1024 ]
 obspers = [ 0.1, 0.5, 0.9 ]
 dimens = [ (128, 128), (128, 256), (256, 256), (1024, 1024) ]
 params = list(product( work_group_sizes, dimens ))
