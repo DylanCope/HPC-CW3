@@ -50,6 +50,7 @@
   \section*{Introduction}
 
   Starting with the serial optimisations performed in the first coursework, this report outlines the optimisations made using OpenCL to parallelise the program. For this coursework the Lattice-Boltzmann algorithm was run on four 2D grids of sizes 128x128, 128x256, 256x256 and 1024x1024 to analyse how the optimisations are effected by scaling. The baseline runtimes for these inputs are 105, 213, 855 and 3477 seconds respectively, any optimisations will be measured as speed ups from these times.
+  \vspace{-.6cm}
 
   \section*{Basic OpenCL Kernels and Reduction}
 
@@ -167,8 +168,11 @@
     This implies the new program should perform better with less extreme obstacle to non-obstacle ratios. An obstacle input file for the 256x256 grid was generated with 50\% of the cells being obstacles, for this input the version with branch masking ran two seconds faster than the one without. On the otherhand the runtime differences between the versions with 10\% or 90\% of the being obstacles was under a second, hence confirming the hypothesis that branch masking makes the program more flexible for dealing with input files.
 
   \end{multicols}
+  \vspace{-.8cm}
 
-  \section*{Further Management of the Memory Hierarchy}
+  \section*{Further Optimisations and Conclusion}
+
+  The final optimisations were the privatization of repeatedly used variables in the kernels and a change to the reduction process for calculating total velocity. The motivation for privatizing variables was the fact that accessing variables lower in the memory hierarchy is slower. Prior to the change to the reduction process, each worker computed a velocity and stored it in a single local array which a single worker then summated. in the improved version half the workers add up two values, then a quarter add another two, and so on until all the values have been added up, this happens is a logarithmic number of steps as a function of the work group size. The final runtimes of 3, 4, 11 and 25 seconds for the four input grids 128x128, 128x256, 256x256 and 1024x1024 respectively.
 
 
 \end{document}
